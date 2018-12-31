@@ -1,0 +1,39 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright (C) 2019 Stephan Gerhold
+
+cc_binary {
+    name: "android.hardware.graphics.composer@2.1-service.drmfb",
+    relative_install_path: "hw",
+    vendor: true,
+    init_rc: ["android.hardware.graphics.composer@2.1-service.drmfb.rc"],
+
+    cpp_std: "c++17",
+
+    srcs: [
+        "service.cpp",
+        "DrmComposer.cpp",
+        "DrmDevice.cpp",
+        "DrmDisplay.cpp",
+        "DrmFramebuffer.cpp"
+    ],
+
+    header_libs: [
+        "android.hardware.graphics.composer@2.1-hal",
+    ],
+
+    shared_libs: [
+        "libbase",
+        "libbinder",
+        "libcutils",
+        "libdrm",
+        "libfmq",
+        "libhidlbase",
+        "libhidltransport",
+        "liblog",
+        "libsync",
+        "libutils",
+        "android.hardware.graphics.common@1.0",
+        "android.hardware.graphics.mapper@2.0",
+        "android.hardware.graphics.composer@2.1",
+    ],
+}
