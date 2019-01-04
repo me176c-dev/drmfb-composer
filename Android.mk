@@ -8,6 +8,7 @@ LOCAL_MODULE := android.hardware.graphics.composer@2.1-service.drmfb
 LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_VENDOR_MODULE := true
 LOCAL_INIT_RC := android.hardware.graphics.composer@2.1-service.drmfb.rc
+
 LOCAL_CPP_STD := c++17
 
 LOCAL_SRC_FILES := \
@@ -15,7 +16,8 @@ LOCAL_SRC_FILES := \
     DrmComposer.cpp \
     DrmDevice.cpp \
     DrmDisplay.cpp \
-    DrmFramebuffer.cpp
+    DrmFramebuffer.cpp \
+    DrmFramebufferLibDrm.cpp
 
 LOCAL_HEADER_LIBRARIES := \
     android.hardware.graphics.composer@2.1-hal
@@ -34,5 +36,12 @@ LOCAL_SHARED_LIBRARIES := \
     android.hardware.graphics.common@1.0 \
     android.hardware.graphics.mapper@2.0 \
     android.hardware.graphics.composer@2.1
+
+ifeq ($(strip $(BOARD_USES_MINIGBM)), true)
+LOCAL_CFLAGS += -DUSE_MINIGBM
+LOCAL_SRC_FILES += DrmFramebufferMinigbm.cpp
+LOCAL_C_INCLUDES += external/minigbm/cros_gralloc
+LOCAL_SHARED_LIBRARIES += libnativewindow # TODO: Remove
+endif
 
 include $(BUILD_EXECUTABLE)
