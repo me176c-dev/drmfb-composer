@@ -241,13 +241,21 @@ Error DrmComposerHal::setPowerMode(Display displayId, IComposerClient::PowerMode
     }
 }
 
-Error DrmComposerHal::setVsyncEnabled(Display displayId, IComposerClient::Vsync /*enabled*/) {
+Error DrmComposerHal::setVsyncEnabled(Display displayId, IComposerClient::Vsync enabled) {
     auto display = mDevice->getConnectedDisplay(displayId);
     if (!display)
         return Error::BAD_DISPLAY;
 
-    // TODO
-    return Error::NONE;
+    switch (enabled) {
+    case IComposerClient::Vsync::ENABLE:
+        display->enableVsync();
+        return Error::NONE;
+    case IComposerClient::Vsync::DISABLE:
+        display->disableVsync();
+        return Error::NONE;
+    default:
+        return Error::BAD_PARAMETER;
+    }
 }
 
 Error DrmComposerHal::setColorTransform(Display /*displayId*/,

@@ -27,8 +27,8 @@ struct DrmDevice {
     DrmDisplay* getConnectedDisplay(uint32_t connector);
 
     inline const std::vector<uint32_t>& crtcs() { return mCrtcs; }
-    uint32_t reserveCrtc(unsigned index);
-    void freeCrtc(uint32_t crtc);
+    uint32_t reserveCrtc(unsigned pipe);
+    void freeCrtc(unsigned pipe);
 
     bool initialize();
     void update();

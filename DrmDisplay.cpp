@@ -39,13 +39,13 @@ constexpr int32_t KINCH_MILLIMETER = 25400;
 }
 
 DrmDisplay::DrmDisplay(DrmDevice& device, uint32_t connectorId)
-    : mDevice(device), mConnector(connectorId) {
+    : mDevice(device), mConnector(connectorId), mVsyncThread(*this) {
     update();
 }
 
 DrmDisplay::~DrmDisplay() {
     if (mCrtc)
-        mDevice.freeCrtc(mCrtc);
+        mDevice.freeCrtc(mPipe);
 }
 
 int32_t DrmDisplay::width(unsigned mode) const {
@@ -101,11 +101,14 @@ void DrmDisplay::update() {
         LOG(INFO) << "Display " << *this << " connected, "
             << mModes.size() << " mode(s), "
             << "default: " << mModes[mCurrentMode];
+        report();
     } else {
         LOG(INFO) << "Display " << *this << " disconnected";
 
+        disableVsync();
+
         if (mCrtc)
-            mDevice.freeCrtc(mCrtc);
+            mDevice.freeCrtc(mPipe);
 
         mFlipPending = false;
         mModeSet = false;
@@ -113,9 +116,11 @@ void DrmDisplay::update() {
 
         mFramebuffers.clear();
         mModes.clear();
-    }
 
-    report();
+        report();
+
+        mVsyncThread.stop();
+    }
 }
 
 void DrmDisplay::setModes(const drmModeModeInfo* begin, const drmModeModeInfo* end) {
@@ -154,9 +159,14 @@ void DrmDisplay::setModes(const drmModeModeInfo* begin, const drmModeModeInfo* e
 }
 
 void DrmDisplay::report() {
-    auto callback = mDevice.callback();
-    if (callback) {
+    if (auto callback = mDevice.callback(); callback) {
         callback->onHotplug(*this, mConnected);
+    }
+}
+
+void DrmDisplay::vsync(int64_t timestamp) {
+    if (auto callback = mDevice.callback(); callback) {
+        callback->onVsync(*this, timestamp);
     }
 }
 
@@ -231,17 +241,18 @@ bool DrmDisplay::enable() {
             continue;
         }
 
-        for (unsigned j = 0; j < mDevice.crtcs().size(); ++j) {
-            if (!(encoder->possible_crtcs & (1 << j)))
+        for (mPipe = 0; mPipe < mDevice.crtcs().size(); ++mPipe) {
+            if (!(encoder->possible_crtcs & (1 << mPipe)))
                 continue;
 
-            mCrtc = mDevice.reserveCrtc(j);
+            mCrtc = mDevice.reserveCrtc(mPipe);
             if (mCrtc) {
                 LOG(INFO) << "Using CRTC " << mCrtc << " for display " << *this;
                 return true;
             } else {
-                LOG(WARNING) << "CRTC " << mDevice.crtcs()[j] << " for display "
-                    << *this << " is already in use by another display";
+                LOG(WARNING) << "CRTC " << mDevice.crtcs()[mPipe]
+                    << " for display " << *this
+                    << " is already in use by another display";
             }
         }
     }
@@ -257,14 +268,27 @@ void DrmDisplay::disable() {
     LOG(INFO) << "Disabling display " << *this;
 
     if (mModeSet) {
+        mVsyncThread.disable();
         awaitPageFlip();
         if (drmModeSetCrtc(mDevice.fd(), mCrtc, 0, 0, 0, nullptr, 0, nullptr)) {
             PLOG(ERROR) << "Failed to disable display " << *this;
         }
         mModeSet = false;
     }
-    mDevice.freeCrtc(mCrtc);
+    mDevice.freeCrtc(mPipe);
     mCrtc = 0;
+}
+
+void DrmDisplay::enableVsync() {
+    mVsyncEnabled = true;
+    if (mModeSet) {
+        mVsyncThread.enable();
+    }
+}
+
+void DrmDisplay::disableVsync() {
+    mVsyncEnabled = false;
+    mVsyncThread.disable();
 }
 
 void DrmDisplay::present(buffer_handle_t buffer) {
@@ -292,6 +316,8 @@ void DrmDisplay::present(buffer_handle_t buffer) {
                 << " for display " << *this;
         } else {
             mModeSet = true;
+            if (mVsyncEnabled)
+                mVsyncThread.enable();
         }
     }
 }

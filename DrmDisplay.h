@@ -9,6 +9,7 @@
 #include <iostream>
 #include <xf86drmMode.h>
 #include "DrmFramebuffer.h"
+#include "DrmVsyncThread.h"
 
 namespace android {
 namespace hardware {
@@ -23,7 +24,9 @@ struct DrmDisplay {
     DrmDisplay(DrmDevice &device, uint32_t connectorId);
     ~DrmDisplay();
 
+    inline DrmDevice& device() const { return mDevice; }
     inline uint32_t id() const { return mConnector; }
+    inline unsigned pipe() const { return mPipe; }
     inline const std::string& name() const { return mName; }
     inline unsigned modeCount() const { return mModes.size(); }
     inline unsigned currentMode() const { return mCurrentMode; }
@@ -44,9 +47,13 @@ struct DrmDisplay {
 
     void update();
     void report();
+    void vsync(int64_t timestamp);
 
     bool enable();
     void disable();
+
+    void enableVsync();
+    void disableVsync();
 
     void present(buffer_handle_t buffer);
     void handlePageFlip();
@@ -69,13 +76,17 @@ private:
     unsigned mCurrentMode;
 
     uint32_t mCrtc = 0; // Selected when display is powered on
+    unsigned mPipe;
 
     bool mConnected = false;
     bool mModeSet = false;
     bool mFlipPending = false;
+    bool mVsyncEnabled = false;
 
     // TODO: Clean up framebuffers
     std::unordered_map<buffer_handle_t, DrmFramebuffer> mFramebuffers;
+
+    DrmVsyncThread mVsyncThread;
 };
 
 std::ostream& operator<<(std::ostream& os, const DrmDisplay& display);

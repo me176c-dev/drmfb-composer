@@ -34,19 +34,18 @@ DrmDisplay* DrmDevice::getConnectedDisplay(uint32_t connector) {
     return display->connected() ? display : nullptr;
 }
 
-uint32_t DrmDevice::reserveCrtc(unsigned index) {
-    auto mask = 1 << index;
-    if (index < mCrtcs.size() && !(mUsedCrtcs & mask)) {
+uint32_t DrmDevice::reserveCrtc(unsigned pipe) {
+    auto mask = 1 << pipe;
+    if (pipe < mCrtcs.size() && !(mUsedCrtcs & mask)) {
         mUsedCrtcs |= mask;
-        return mCrtcs[index];
+        return mCrtcs[pipe];
     }
     return 0;
 }
 
-void DrmDevice::freeCrtc(uint32_t crtc) {
-    auto i = std::find(mCrtcs.begin(), mCrtcs.end(), crtc);
-    if (i != mCrtcs.end()) {
-        mUsedCrtcs &= ~(1 << std::distance(mCrtcs.begin(), i));
+void DrmDevice::freeCrtc(unsigned pipe) {
+    if (pipe < mCrtcs.size()) {
+        mUsedCrtcs &= ~(1 << pipe);
     }
 }
 
