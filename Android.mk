@@ -19,7 +19,8 @@ LOCAL_SRC_FILES := \
     DrmFramebuffer.cpp \
     DrmFramebufferLibDrm.cpp \
     GraphicsThread.cpp \
-    DrmVsyncThread.cpp
+    DrmVsyncThread.cpp \
+    DrmHotplugThread.cpp
 
 LOCAL_HEADER_LIBRARIES := \
     android.hardware.graphics.composer@2.1-hal

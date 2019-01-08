@@ -30,7 +30,7 @@ void GraphicsThread::enable() {
 
         if (!mStarted) {
             mStarted = true;
-            mThread = std::thread(&GraphicsThread::loop, this);
+            mThread = std::thread(&GraphicsThread::main, this);
             return;
         }
     }
@@ -57,26 +57,23 @@ void GraphicsThread::stop() {
     mThread.join();
 }
 
-void GraphicsThread::loop() {
+void GraphicsThread::main() {
     setpriority(PRIO_PROCESS, 0, HAL_PRIORITY_URGENT_DISPLAY);
     prctl(PR_SET_NAME, mName.c_str(), 0, 0, 0);
 
     LOG(DEBUG) << "Starting thread " << mName;
 
     std::unique_lock lock{mMutex};
-    while (true) {
-        if (!mEnabled) {
-            mCondition.wait(lock, [this] { return mEnabled || !mStarted; });
-            if (!mStarted) {
-                LOG(DEBUG) << "Stopping thread " << mName;
-                return;
-            }
-        }
-
-        lock.unlock();
-        run();
-        lock.lock();
+    while (mStarted) {
+        work(lock);
+        mCondition.wait(lock, [this] { return mEnabled || !mStarted; });
     }
+
+    LOG(DEBUG) << "Stopping thread " << mName;
+}
+
+void GraphicsThread::work(std::unique_lock<std::mutex>& lock) {
+    loop(lock, [this] { run(); });
 }
 
 }  // namespace drmfb

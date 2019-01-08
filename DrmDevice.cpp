@@ -16,7 +16,7 @@ namespace composer {
 namespace V2_1 {
 namespace drmfb {
 
-DrmDevice::DrmDevice(int fd) : mFd(fd) {}
+DrmDevice::DrmDevice(int fd) : mFd(fd), mHotplugThread(*this) {}
 DrmDevice::DrmDevice(const std::string& path) : DrmDevice(open(path.c_str(), O_RDWR)) {
     if (mFd < 0)
         PLOG(ERROR) << "Failed to open DRM device (" << path << ")";
@@ -101,9 +101,13 @@ void DrmDevice::enable(DrmCallback *callback) {
             display->report();
         }
     }
+
+    mHotplugThread.enable();
 }
 
 void DrmDevice::disable() {
+    mHotplugThread.disable();
+
     mCallback = nullptr;
     for (auto& p : mDisplays) {
         p.second->disable();

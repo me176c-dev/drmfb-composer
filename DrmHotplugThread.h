@@ -12,19 +12,18 @@ namespace composer {
 namespace V2_1 {
 namespace drmfb {
 
-struct DrmDisplay;
+struct DrmDevice;
 
-struct DrmVsyncThread : public GraphicsThread {
-    DrmVsyncThread(DrmDisplay& display);
+struct DrmHotplugThread : public GraphicsThread {
+    DrmHotplugThread(DrmDevice& device);
 
 protected:
-    void run() override;
+    void work(std::unique_lock<std::mutex>& lock) override;
 
 private:
-    int waitFallback();
+    bool receiveEvent(int fd);
 
-    DrmDisplay& mDisplay;
-    int64_t mTimestamp = 0;
+    DrmDevice& mDevice;
 };
 
 }  // namespace drmfb

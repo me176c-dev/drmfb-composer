@@ -22,10 +22,22 @@ struct GraphicsThread {
     void disable();
     void stop();
 
-    virtual void run() = 0;
-    void loop();
+protected:
+    virtual void run() {};
+    virtual void work(std::unique_lock<std::mutex>& lock);
+
+    template<typename F>
+    void loop(std::unique_lock<std::mutex>& lock, F f) {
+        while (mEnabled) {
+            lock.unlock();
+            f();
+            lock.lock();
+        }
+    }
 
 private:
+    void main();
+
     std::mutex mMutex;
     std::thread mThread;
     std::string mName;

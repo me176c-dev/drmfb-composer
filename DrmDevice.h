@@ -9,6 +9,7 @@
 #include <android-base/unique_fd.h>
 #include "DrmDisplay.h"
 #include "DrmCallback.h"
+#include "DrmHotplugThread.h"
 
 namespace android {
 namespace hardware {
@@ -46,6 +47,7 @@ private:
     std::vector<uint32_t> mCrtcs;
     uint32_t mUsedCrtcs = 0; // The CRTCs that are already being used by a display
 
+    DrmHotplugThread mHotplugThread;
     DrmCallback* mCallback = nullptr;
 };
 
