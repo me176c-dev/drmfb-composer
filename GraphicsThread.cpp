@@ -25,7 +25,7 @@ GraphicsThread::~GraphicsThread() {
 
 void GraphicsThread::enable() {
     {
-        std::scoped_lock lock{mMutex};
+        std::lock_guard lock{mMutex};
         mEnabled = true;
 
         if (!mStarted) {
@@ -39,13 +39,13 @@ void GraphicsThread::enable() {
 }
 
 void GraphicsThread::disable() {
-    std::scoped_lock lock{mMutex};
+    std::lock_guard lock{mMutex};
     mEnabled = false;
 }
 
 void GraphicsThread::stop() {
     {
-        std::scoped_lock lock{mMutex};
+        std::lock_guard lock{mMutex};
         if (!mStarted)
             return;
 

@@ -9,7 +9,7 @@ LOCAL_MODULE_RELATIVE_PATH := hw
 LOCAL_VENDOR_MODULE := true
 LOCAL_INIT_RC := android.hardware.graphics.composer@2.1-service.drmfb.rc
 
-LOCAL_CPP_STD := c++17
+LOCAL_CPP_STD := c++1z
 
 LOCAL_SRC_FILES := \
     service.cpp \
