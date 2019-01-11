@@ -322,7 +322,17 @@ Error DrmComposerHal::setLayerCursorPosition(Display /*displayId*/,
 }
 
 Error DrmComposerHal::setLayerBuffer(Display /*displayId*/, Layer /*layer*/,
-        buffer_handle_t /*buffer*/, int32_t /*acquireFence*/) {
+        buffer_handle_t /*buffer*/, int32_t acquireFence) {
+
+    if (acquireFence >= 0) {
+        /*
+         * This buffer will be only used by client composition.
+         * During client composition, SurfaceFlinger will wait for the buffer
+         * (if necessary), so there is no need to do it here.
+         */
+        close(acquireFence);
+    }
+
     return Error::NONE; // Ignored
 }
 
