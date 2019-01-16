@@ -90,19 +90,37 @@ void DrmDevice::enable(DrmCallback *callback) {
         LOG(INFO) << "Reporting display " << *primary->second
             << " as primary display";
         primary->second->report();
-    }
+        mPrimaryDisplay = primary->second->id();
+    } else {
+        for (auto i = mDisplays.begin(), end = mDisplays.end(); i != end; ++i) {
+            if (i == primary)
+                continue; // Primary display is already reported
 
-    for (auto i = mDisplays.begin(), end = mDisplays.end(); i != end; ++i) {
-        if (i == primary)
-            continue; // Primary display is already reported
-
-        auto display = i->second.get();
-        if (display->connected()) {
-            display->report();
+            auto display = i->second.get();
+            if (display->connected()) {
+                display->report();
+                // Report only one display during initialization on Oreo
+                mPrimaryDisplay = display->id();
+                break;
+            }
         }
     }
 
     mHotplugThread.enable();
+}
+
+// Reports all other displays skipped during initialization
+void DrmDevice::reportExternal() {
+    if (!mPrimaryDisplay)
+        return;
+
+    for (auto i = mDisplays.begin(), end = mDisplays.end(); i != end; ++i) {
+        auto display = i->second.get();
+        if (display->id() != mPrimaryDisplay && display->connected()) {
+            display->report();
+        }
+    }
+    mPrimaryDisplay = 0;
 }
 
 void DrmDevice::disable() {

@@ -232,6 +232,7 @@ Error DrmComposerHal::setPowerMode(Display displayId, IComposerClient::PowerMode
         display->disable();
         return Error::NONE;
     case IComposerClient::PowerMode::ON:
+        mDevice->reportExternal();
         return display->enable() ? Error::NONE : Error::NO_RESOURCES;
     case IComposerClient::PowerMode::DOZE:
     case IComposerClient::PowerMode::DOZE_SUSPEND:

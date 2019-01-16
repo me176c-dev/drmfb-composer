@@ -36,6 +36,7 @@ struct DrmDevice {
 
     inline DrmCallback* callback() { return mCallback; }
     void enable(DrmCallback *callback);
+    void reportExternal();
     void disable();
 
 private:
@@ -49,6 +50,7 @@ private:
 
     DrmHotplugThread mHotplugThread;
     DrmCallback* mCallback = nullptr;
+    uint32_t mPrimaryDisplay = 0;
 };
 
 }  // namespace drmfb
