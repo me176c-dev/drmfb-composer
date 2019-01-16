@@ -4,6 +4,7 @@
 #pragma once
 
 #include <unordered_map>
+#include <android-base/unique_fd.h>
 #include <composer-hal/2.1/ComposerHal.h>
 #include "DrmDevice.h"
 
@@ -105,7 +106,7 @@ private:
 
     // The next client target buffer to be displayed
     buffer_handle_t mBuffer = nullptr;
-    int mAcquireFence;
+    base::unique_fd mAcquireFence;
 };
 
 }  // namespace drmfb

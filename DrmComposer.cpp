@@ -267,7 +267,7 @@ Error DrmComposerHal::setClientTarget(Display /*displayId*/,
         buffer_handle_t target, int32_t acquireFence,
         int32_t /*dataspace*/, const std::vector<hwc_rect_t>& /*damage*/) {
     mBuffer = target;
-    mAcquireFence = acquireFence;
+    mAcquireFence.reset(acquireFence);
     return Error::NONE;
 }
 
@@ -308,7 +308,7 @@ Error DrmComposerHal::presentDisplay(Display displayId, int32_t* /*outPresentFen
 
     if (mAcquireFence >= 0) {
         sync_wait(mAcquireFence, -1);
-        close(mAcquireFence);
+        mAcquireFence.reset();
     }
 
     display->present(mBuffer);
