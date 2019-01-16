@@ -199,7 +199,7 @@ drmEventContext pageFlipEvCtx = {
 void DrmDisplay::handlePageFlip() {
     if (mFlipPending) {
         mFlipPending = false;
-    } else {
+    } else if (mConnected) {
         LOG(WARNING) << "handlePageFlip() called for display " << *this
             << " without flip pending";
     }
