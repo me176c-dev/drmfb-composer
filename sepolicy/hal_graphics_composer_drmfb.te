@@ -1,0 +1,10 @@
+type hal_graphics_composer_drmfb, domain;
+hal_server_domain(hal_graphics_composer_drmfb, hal_graphics_composer)
+
+type hal_graphics_composer_drmfb_exec, exec_type, vendor_file_type, file_type;
+init_daemon_domain(hal_graphics_composer_drmfb)
+
+vndbinder_use(hal_graphics_composer_drmfb)
+
+# Listen for DRM hotplug events
+allow hal_graphics_composer_drmfb self:netlink_kobject_uevent_socket create_socket_perms_no_ioctl;

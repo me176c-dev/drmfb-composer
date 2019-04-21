@@ -83,6 +83,10 @@ Add [drmfb-composer] to your Android build tree and build `android.hardware.grap
   - `/vendor/bin/hw/android.hardware.graphics.composer@2.1-service.drmfb`
   - `/vendor/etc/init/android.hardware.graphics.composer@2.1-service.drmfb.rc`
 
+## SELinux Policy
+`sepolicy` contains a simple SELinux Policy definition for drmfb-composer.
+You can include it in the build by adding the directory to `BOARD_SEPOLICY_DIRS`.
+
 ## License
 [drmfb-composer] is licensed under the [Apache License, Version 2.0]. Contributions welcome!
 
