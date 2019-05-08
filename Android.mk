@@ -41,10 +41,12 @@ LOCAL_SHARED_LIBRARIES := \
     android.hardware.graphics.composer@2.1
 
 ifeq ($(strip $(BOARD_USES_MINIGBM)), true)
-LOCAL_CFLAGS += -DUSE_MINIGBM
-LOCAL_SRC_FILES += DrmFramebufferMinigbm.cpp
-LOCAL_C_INCLUDES += external/minigbm/cros_gralloc
-LOCAL_SHARED_LIBRARIES += libnativewindow # TODO: Remove
+    MINIGBM_PATH ?= external/minigbm
+
+    LOCAL_CFLAGS += -DUSE_MINIGBM
+    LOCAL_SRC_FILES += DrmFramebufferMinigbm.cpp
+    LOCAL_C_INCLUDES += $(MINIGBM_PATH)/cros_gralloc
+    LOCAL_SHARED_LIBRARIES += libnativewindow # TODO: Remove
 endif
 
 include $(BUILD_EXECUTABLE)
