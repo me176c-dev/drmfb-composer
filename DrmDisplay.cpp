@@ -281,9 +281,7 @@ void DrmDisplay::disable() {
 
 void DrmDisplay::enableVsync() {
     mVsyncEnabled = true;
-    if (mModeSet) {
-        mVsyncThread.enable();
-    }
+    mVsyncThread.enable();
 }
 
 void DrmDisplay::disableVsync() {
@@ -316,8 +314,6 @@ void DrmDisplay::present(buffer_handle_t buffer) {
                 << " for display " << *this;
         } else {
             mModeSet = true;
-            if (mVsyncEnabled)
-                mVsyncThread.enable();
         }
     }
 }

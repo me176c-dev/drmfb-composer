@@ -17,7 +17,8 @@ namespace V2_1 {
 namespace drmfb {
 
 namespace {
-constexpr int RECEIVE_BUFFER = 1 * 1024 * 1024; // 1 MiB
+// Note: This must be <= /proc/sys/net/core/rmem_max (written in init.rc)
+constexpr int RECEIVE_BUFFER = 256 * 1024; // 256 KiB
 constexpr int MESSAGE_BUFFER = 1 * 1024; // 1 KiB
 }
 
